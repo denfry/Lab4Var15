@@ -1,5 +1,7 @@
 package com.example.lab4var15;
 
+import javafx.beans.property.SimpleBooleanProperty;
+
 public class Mouse extends PeripheralDevice {
 
     private boolean wireless;
@@ -7,7 +9,7 @@ public class Mouse extends PeripheralDevice {
         super(name, price, deviceType);
         this.wireless = wireless;
     }
-    public boolean isWireless() {
+    public boolean getWireless() {
         return wireless;
     }
 }

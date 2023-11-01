@@ -1,13 +1,16 @@
 package com.example.lab4var15;
 
 import javafx.application.Application;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -15,6 +18,8 @@ import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PeripheralDeviceTableApp extends Application {
     private final TableView<PeripheralDevice> table = new TableView<>();
@@ -129,20 +134,36 @@ public class PeripheralDeviceTableApp extends Application {
     private static TableColumn<PeripheralDevice, Boolean> getWirelessColumn() {
         TableColumn<PeripheralDevice, Boolean> wirelessColumn = new TableColumn<>("Wireless");
         wirelessColumn.setCellValueFactory(cellData -> {
-            if (cellData.getValue() instanceof Mouse) {
-                return new SimpleBooleanProperty(((Mouse) cellData.getValue()).isWireless());
+            PeripheralDevice device = cellData.getValue();
+            if (device instanceof Mouse) {
+                return new SimpleBooleanProperty(((Mouse) cellData.getValue()).getWireless());
             }
             return new SimpleBooleanProperty().asObject();
         });
-        wirelessColumn.setCellFactory(column -> new TableCell<>() {
+        wirelessColumn.setCellFactory(column -> new CheckBoxTableCell<PeripheralDevice, Boolean>() {
+            private final CheckBox checkBox = new CheckBox();
+            {
+                checkBox.setAlignment(Pos.CENTER);
+                setAlignment(Pos.CENTER);
+
+                checkBox.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+                    if(isSelected){
+                        setStyle("-fx-background-color: lightgreen;");
+                    } else {
+                        setStyle("-fx-background-color: lightcoral;");
+                    }
+                });
+            }
             @Override
-            protected void updateItem(Boolean item, boolean empty) {
+            public void updateItem(Boolean item, boolean empty) {
                 super.updateItem(item, empty);
                 if (item == null || empty) {
                     setText(null);
+                    setGraphic(null);
                     setStyle("");
                 } else {
-                    setText(item ? "true" : "false");
+                    checkBox.setSelected(item);
+                    setGraphic(checkBox);
                     if (!item) {
                         setStyle("-fx-background-color: lightcoral;");
                     } else {
@@ -159,16 +180,16 @@ public class PeripheralDeviceTableApp extends Application {
         try {
             String name = nameTextField.getText();
             double price = Double.parseDouble(priceTextField.getText());
-            String deviceType = "Unknown";  // Устанавливаем по умолчанию значение "Unknown"
+            String deviceType = "Unknown";
 
             if (wirelessCheckBox.isSelected()) {
                 boolean isWireless = true;
-                deviceType = "Mouse";  // Устанавливаем тип устройства
-                devices.add(new Mouse(name, price, isWireless, deviceType)); // Передаем deviceType в конструктор Mouse
+                deviceType = "Mouse";
+                devices.add(new Mouse(name, price, isWireless, deviceType));
             } else {
                 int screenSize = Integer.parseInt(screenSizeTextField.getText());
-                deviceType = "Monitor";  // Устанавливаем тип устройства
-                devices.add(new Monitor(name, price, screenSize, deviceType)); // Передаем deviceType в конструктор Monitor
+                deviceType = "Monitor";
+                devices.add(new Monitor(name, price, screenSize, deviceType));
             }
 
             nameTextField.clear();
